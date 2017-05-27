@@ -55,14 +55,14 @@ extern int iReadReg(u16 a_u2Addr , u8 * a_puBuff , u16 i2cId);
 extern int iWriteReg(u16 a_u2Addr , u32 a_u4Data , u32 a_u4Bytes , u16 i2cId);
 
 #define OV8858_write_cmos_sensor(addr, para) iWriteReg((u16) addr , (u32) para , 1, ov8858.write_id) //yanggy modify for I2c read >>>Do not modify this part when code merging,or I2C will not available
-// yanggy add for CAM Performance Optimization begin
+//Gionee yanggy add for CAM Performance Optimization begin
 #ifdef ORIGINAL_VERSION 
 #else
 static struct ov8858_MIPI_otp_struct s_otp_wb;
 static struct ov8858_MIPI_otp_struct s_otp_lenc;
 static bool isNeedReadOtp = true;
 #endif
-// yanggy add for CAM Performance Optimization end
+//Gionee yanggy add for CAM Performance Optimization end
 kal_uint16 OV8858_read_cmos_sensor(kal_uint32 addr)
 {
 	kal_uint16 get_byte=0;
@@ -71,7 +71,7 @@ kal_uint16 OV8858_read_cmos_sensor(kal_uint32 addr)
 }
 
 
-// yanggy 2013-09-03 add for module compability begin
+//Gionee yanggy 2013-09-03 add for module compability begin
 #ifdef GN_MTK_BSP_LENS_COMPABILITY
 static unsigned int OV8858_MIPI_Module_id=0;
 static unsigned int OV8858_MIPI_Module_Lens_id =0;
@@ -475,7 +475,7 @@ kal_uint16 ov8858_mipi_update_wb_register_from_otp(void)
 	kal_uint32 R_gain=0, B_gain=0, G_gain=0;
 	OV8858DB("ov8858_MIPI_update_wb_register_from_otp_Start[wangc_test]\n");
 	//check first wb OTP with valid OTP
-// yanggy add for CAM Performance Optimization begin
+//Gionee yanggy add for CAM Performance Optimization begin
 #ifdef ORIGINAL_VERSION 
 	for(i = 1; i <= 3; i++)
 		{
@@ -524,7 +524,7 @@ kal_uint16 ov8858_mipi_update_wb_register_from_otp(void)
         current_otp = s_otp_wb;
     }
 #endif
-    // yanggy add for CAM Performance Optimization end	
+    //Gionee yanggy add for CAM Performance Optimization end	
 	//calculate gain
 	//0x400 = 1x gain
 	if(current_otp.light_rg==0)
@@ -588,7 +588,7 @@ kal_uint16 ov8858_mipi_update_lenc_register_from_otp(void)
 	   kal_uint16 temp,i,otp_index;
 
     OV8858DB("ov8858_mipi_update_lenc_register_from_otp_Start[wangc_test]\n");
-// yanggy add for CAM Performance Optimization begin
+//Gionee yanggy add for CAM Performance Optimization begin
 #ifdef ORIGINAL_VERSION
     for(i = 1; i<4;i++)
 	{
@@ -637,7 +637,7 @@ kal_uint16 ov8858_mipi_update_lenc_register_from_otp(void)
         current_otp = s_otp_lenc;
     }
 #endif
-    // yanggy add for CAM Performance Optimization end
+    //Gionee yanggy add for CAM Performance Optimization end
 	ov8858_mipi_update_lenc(&current_otp);
 	OV8858DB("ov8858_mipi_update_lenc_register_from_otp_Finished[wangc_test]\n");
 	return 1;// wangc_test_ov8858_mipi_update_lenc_register_from_otp success
@@ -653,7 +653,7 @@ kal_uint16 ov8858_mipi_update_lenc_register_from_otp(void)
 
 
 
-// yanggy 2013-09-03 add for module compability end
+//Gionee yanggy 2013-09-03 add for module compability end
 
 
 
@@ -807,12 +807,12 @@ void OV8858_write_shutter(kal_uint32 shutter)
 	kal_uint32 line_length = 0;
 	kal_uint32 frame_length = 0;
 	unsigned long flags;
-// <wujh><2014-06-05> modify for CR01284824 <fix frame rate in 25fps>  begin
+//Gionee <wujh><2014-06-05> modify for CR01284824 <fix frame rate in 25fps>  begin
 #ifdef ORIGINAL_VERSION
 #else 
 	kal_uint16 realtime_fp = 0;
 #endif
-// <wujh><2014-06-05> modify for CR01284824 <fix frame rate in 25fps>  end
+//Gionee <wujh><2014-06-05> modify for CR01284824 <fix frame rate in 25fps>  end
 	//TODO~
 	kal_uint32 read_shutter_1 = 0;
 	kal_uint32 read_shutter_2 = 0;
@@ -850,7 +850,7 @@ void OV8858_write_shutter(kal_uint32 shutter)
 	OV8858_FeatureControl_PERIOD_LineNum = frame_length;
 	spin_unlock_irqrestore(&ov8858mipiraw_drv_lock,flags);
 
-// <wujh><2014-06-05> modify for CR01284824<fix frame rate at 25fps>  begin
+//Gionee <wujh><2014-06-05> modify for CR01284824<fix frame rate at 25fps>  begin
 #ifdef ORIGINAL_VERSION
 #else 
 	if (ov8858.sensorMode==SENSOR_MODE_CAPTURE)
@@ -868,7 +868,7 @@ void OV8858_write_shutter(kal_uint32 shutter)
              		}
 		}
 #endif
-// <wujh><2014-06-05> modify for CR01284824 <fix frame rate at 25fps>  end
+//Gionee <wujh><2014-06-05> modify for CR01284824 <fix frame rate at 25fps>  end
 	//Set total frame length
 	OV8858_write_cmos_sensor(0x380e, (frame_length >> 8) & 0xFF);
 	OV8858_write_cmos_sensor(0x380f, frame_length & 0xFF);
@@ -2643,7 +2643,7 @@ UINT32 OV8858Open(void)
 }
 
 
-// yanggy 2013-09-03 add for module compability begin
+//Gionee yanggy 2013-09-03 add for module compability begin
 #ifdef GN_MTK_BSP_LENS_COMPABILITY
 static int OV8858_MIPI_GetModuleInfo(unsigned int *module_id, unsigned int *lens_id)
 {
@@ -2682,7 +2682,7 @@ static int OV8858_MIPI_GetModuleInfo(unsigned int *module_id, unsigned int *lens
 
 }
 #endif
-// yanggy 2013-09-03 add for module compability end
+//Gionee yanggy 2013-09-03 add for module compability end
 
 
 UINT32 OV8858GetSensorID(UINT32 *sensorID)
@@ -2690,11 +2690,11 @@ UINT32 OV8858GetSensorID(UINT32 *sensorID)
     int  retry = 2;
 
 
-// yanggy 2013-09-03 add for module compbility begin
+//Gionee yanggy 2013-09-03 add for module compbility begin
 #ifdef GN_MTK_BSP_LENS_COMPABILITY
     unsigned int module_id,lens_id;
 #endif
-// yanggy 2013-09-03 add for module compbility end
+//Gionee yanggy 2013-09-03 add for module compbility end
 
 	OV8858DB("OV8858GetSensorID enter :\n ");
 
@@ -2719,7 +2719,7 @@ UINT32 OV8858GetSensorID(UINT32 *sensorID)
         return ERROR_SENSOR_CONNECT_FAIL;
     }
 
-// yanggy 2013-09-03 add for module compbility begin
+//Gionee yanggy 2013-09-03 add for module compbility begin
 #ifdef GN_MTK_BSP_LENS_COMPABILITY
     OV8858_Sensor_Init();
     OV8858_MIPI_GetModuleInfo(&module_id, &lens_id);
@@ -2739,7 +2739,7 @@ UINT32 OV8858GetSensorID(UINT32 *sensorID)
 
     }
 #endif
-// yanggy 2013-09-03 add for module compbility end	
+//Gionee yanggy 2013-09-03 add for module compbility end	
 
     return ERROR_NONE;
 }
@@ -3116,7 +3116,7 @@ UINT32 OV8858GetInfo(MSDK_SCENARIO_ID_ENUM ScenarioId,
 
     pSensorInfo->SensroInterfaceType=SENSOR_INTERFACE_TYPE_MIPI;
 
-// yanggy modify for CAM Performance Optimization begin
+//Gionee yanggy modify for CAM Performance Optimization begin
 #ifdef ORIGINAL_VERSION
     pSensorInfo->CaptureDelayFrame = 3;
     pSensorInfo->PreviewDelayFrame = 3;
@@ -3124,7 +3124,7 @@ UINT32 OV8858GetInfo(MSDK_SCENARIO_ID_ENUM ScenarioId,
     pSensorInfo->CaptureDelayFrame = 1;
     pSensorInfo->PreviewDelayFrame = 1;
 #endif
-// yanggy modify for CAM Performance Optimization end
+//Gionee yanggy modify for CAM Performance Optimization end
     pSensorInfo->VideoDelayFrame = 3;
 
     pSensorInfo->SensorDrivingCurrent = ISP_DRIVING_8MA;
@@ -3186,12 +3186,12 @@ UINT32 OV8858GetInfo(MSDK_SCENARIO_ID_ENUM ScenarioId,
             break;
     }
 	
-// yanggy 2013-09-03 add for module compability begin
+//Gionee yanggy 2013-09-03 add for module compability begin
 #ifdef GN_MTK_BSP_LENS_COMPABILITY
     pSensorInfo->Sensor_Lens_id = OV8858_MIPI_Module_Lens_id;
     pSensorInfo->Sensor_Module_id = OV8858_MIPI_Module_id;
 #endif
-// yanggy 2013-09-03 add for module compability end
+//Gionee yanggy 2013-09-03 add for module compability end
 
     memcpy(pSensorConfigData, &OV8858SensorConfigData, sizeof(MSDK_SENSOR_CONFIG_STRUCT));
     OV8858DB("OV8858GetInfo exit!!\n");

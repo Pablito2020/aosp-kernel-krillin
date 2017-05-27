@@ -78,7 +78,7 @@
 
 #define S5K8AAYX_MIPI_DEBUG
 #ifdef S5K8AAYX_MIPI_DEBUG
-#define SENSORDB(fmt, arg...) pr_debug(fmt, ##arg)
+#define SENSORDB(fmt, arg...) xlog_printk(ANDROID_LOG_DEBUG, "[S5K8AAYXMIPI]", fmt, ##arg)
 
 #else
 #define SENSORDB(x,...)

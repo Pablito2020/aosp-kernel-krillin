@@ -1,3 +1,17 @@
+/*
+* Copyright (C) 2011-2014 MediaTek Inc.
+*
+* This program is free software: you can redistribute it and/or modify it under the terms of the
+* GNU General Public License version 2 as published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with this program.
+* If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /******************************************************************************
 *
  *
@@ -75,31 +89,59 @@ typedef unsigned long long uint64;
 #define DEBUG_ANA_REG
 #define DEBUG_AUD_CLK
 
+/*
 #ifdef DEBUG_AUDDRV
-#define PRINTK_AUDDRV(format, args...) pr_debug(format, ##args )
+#define PRINTK_AUDDRV(format, args...) xlog_printk( ANDROID_LOG_VERBOSE,"Sound",format, ##args )
 #else
 #define PRINTK_AUDDRV(format, args...)
 #endif
 
 #ifdef DEBUG_AFE_REG
-#define PRINTK_AFE_REG(format, args...) pr_debug(format, ##args )
+#define PRINTK_AFE_REG(format, args...) xlog_printk( ANDROID_LOG_VERBOSE,"Sound",format, ##args )
 #else
 #define PRINTK_AFE_REG(format, args...)
 #endif
 
 #ifdef DEBUG_ANA_REG
-#define PRINTK_ANA_REG(format, args...) pr_debug(format, ##args )
+#define PRINTK_ANA_REG(format, args...) xlog_printk( ANDROID_LOG_VERBOSE,"Sound",format, ##args )
 #else
 #define PRINTK_ANA_REG(format, args...)
 #endif
 
 #ifdef DEBUG_AUD_CLK
-#define PRINTK_AUD_CLK(format, args...)  pr_debug(format, ##args )
+#define PRINTK_AUD_CLK(format, args...) xlog_printk( ANDROID_LOG_VERBOSE,"Sound",format, ##args )
 #else
 #define PRINTK_AUD_CLK(format, args...)
 #endif
 
-#define PRINTK_AUD_ERROR(format, args...)  pr_err(format, ##args )
+#define PRINTK_AUD_ERROR(format, args...) xlog_printk( ANDROID_LOG_VERBOSE,"Sound",format, ##args )
+*/
+
+#ifdef DEBUG_AUDDRV
+#define PRINTK_AUDDRV(format, args...) printk(format, ##args )
+#else
+#define PRINTK_AUDDRV(format, args...)
+#endif
+
+#ifdef DEBUG_AFE_REG
+#define PRINTK_AFE_REG(format, args...) printk(format, ##args )
+#else
+#define PRINTK_AFE_REG(format, args...)
+#endif
+
+#ifdef DEBUG_ANA_REG
+#define PRINTK_ANA_REG(format, args...) printk(format, ##args )
+#else
+#define PRINTK_ANA_REG(format, args...)
+#endif
+
+#ifdef DEBUG_AUD_CLK
+#define PRINTK_AUD_CLK(format, args...)  printk(format, ##args )
+#else
+#define PRINTK_AUD_CLK(format, args...)
+#endif
+
+#define PRINTK_AUD_ERROR(format, args...)  printk(format, ##args )
 
 // if need assert , use AUDIO_ASSERT(true)
 #define AUDIO_ASSERT(value) BUG_ON(false)

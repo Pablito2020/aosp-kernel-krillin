@@ -219,7 +219,7 @@ static bool CheckNullPointer(void *pointer)
 {
     if (pointer == NULL)
     {
-        pr_debug("CheckNullPointer pointer = NULL");
+        printk("CheckNullPointer pointer = NULL");
         return true;
     }
     return false;
@@ -229,7 +229,7 @@ static bool CheckSize(uint32 size)
 {
     if ((size) == 0)
     {
-        pr_debug("CheckSize size = 0");
+        printk("CheckSize size = 0");
         return true;
     }
     return false;
@@ -258,7 +258,7 @@ static kal_uint32 AudDrv_SampleRateIndexConvert(kal_uint32 SampleRateIndex)
         case 0xa:
             return 48000;
         default:
-            pr_debug("AudDrv_SampleRateIndexConvert SampleRateIndex = %d\n", SampleRateIndex);
+            printk("AudDrv_SampleRateIndexConvert SampleRateIndex = %d\n", SampleRateIndex);
             return 44100;
     }
     return 0;
@@ -352,17 +352,17 @@ void CheckWriteWaitEvent(void)
     unsigned int DL1_Interrupt_Interval_ns = DL1_Interrupt_Interval_Limit * 1000000;
     for (i = 0; i < WriteArrayMax ; i++)
     {
-        //pr_debug("WriteRecordArray[%d] = %d ",i ,WriteRrecordArray[i]);
+        //printk("WriteRecordArray[%d] = %d ",i ,WriteRrecordArray[i]);
         if (WriteRecordArray[i] > DL1_Interrupt_Interval_ns)
         {
             OverTimeCounter++;
         }
     }
-    //pr_debug("DL1_Interrupt_Interval_Limit = %d DL1_Interrupt_Interval_ns = %d\n",DL1_Interrupt_Interval_Limit,DL1_Interrupt_Interval_ns);
+    //printk("DL1_Interrupt_Interval_Limit = %d DL1_Interrupt_Interval_ns = %d\n",DL1_Interrupt_Interval_Limit,DL1_Interrupt_Interval_ns);
 
     if (OverTimeCounter >= WriteWarningTrigger)
     {
-        pr_err("Audio Dump FTrace, OverTimeCounter=%d n", OverTimeCounter);
+        xlog_printk(ANDROID_LOG_ERROR, "Sound", "Audio Dump FTrace, OverTimeCounter=%d n", OverTimeCounter);
         if (AuddrvAeeEnable)
         {
             aee_kernel_exception_api(__FILE__, __LINE__, DB_OPT_FTRACE, "Audio is blocked", "audio blocked dump ftrace");
@@ -606,11 +606,6 @@ static int AudDrv_Read_Procmem(char *buf, char **start, off_t offset, int count 
     PRINTK_AUDDRV("AudDrv_Read_Procmem len = %d\n", len);
 
     AudDrv_Clk_Off();
-    if (len > 4096)
-    {
-        pr_err("Audio Dump FTrace, AudDrv_Read_Procmem len=%d count=%d . len > 4096", len,count);
-        aee_kernel_exception_api(__FILE__, __LINE__, DB_OPT_FTRACE, "AudDrv_Read_Procmem OverFlow", "AudDrv_Read_Procmem OverFlow");
-    }
     PRINTK_AUDDRV("-AudDrv_Read_Procmem \n");
     return len;
 }
@@ -790,13 +785,13 @@ void Auddrv_UL_Interrupt_Handler(void)  // irq2 ISR handler
  */
 void Auddrv_DL_Interrupt_Handler(void)  // irq1 ISR handler
 {
-    unsigned long flags = 0;
+    unsigned long flags1,flags2;
     kal_int32 Afe_consumed_bytes = 0;
     kal_int32 HW_memory_index = 0;
     kal_int32 HW_Cur_ReadIdx = 0;
     AFE_BLOCK_T *Afe_Block = &(AFE_dL1_Control_context.rBlock);
     //spin lock with interrupt disable
-    spin_lock_irqsave(&auddrv_irqstatus_lock, flags);
+    spin_lock_irqsave(&auddrv_irqstatus_lock, flags1);
 
     if (AudDrvSuspendStatus == true)
     {
@@ -836,7 +831,7 @@ void Auddrv_DL_Interrupt_Handler(void)  // irq1 ISR handler
     PRINTK_AUDDRV("+Auddrv_DL_Interrupt_Handler ReadIdx:%x WriteIdx:%x, DataRemained:%x, Afe_consumed_bytes:%x HW_memory_index = %x \n",
         Afe_Block->u4DMAReadIdx,Afe_Block->u4WriteIdx,Afe_Block->u4DataRemained,Afe_consumed_bytes,HW_memory_index);
         */
-    spin_lock_irqsave(&auddrv_DLCtl_lock, flags);// Add for ISR data concurrency
+    spin_lock_irqsave(&auddrv_DLCtl_lock, flags2);// Add for ISR data concurrency
 
     if (Afe_Block->u4DataRemained < Afe_consumed_bytes || Afe_Block->u4DataRemained <= 0 || Afe_Block->u4DataRemained  > Afe_Block->u4BufferSize || AudIrqReset)
     {
@@ -863,11 +858,11 @@ void Auddrv_DL_Interrupt_Handler(void)  // irq1 ISR handler
         PRINTK_AUDDRV("-DL_Handling normal ReadIdx:%x ,DataRemained:%x, WriteIdx:%x \n",
             Afe_Block->u4DMAReadIdx,Afe_Block->u4DataRemained,Afe_Block->u4WriteIdx);*/
     }
-    spin_unlock_irqrestore(&auddrv_DLCtl_lock, flags);
+    spin_unlock_irqrestore(&auddrv_DLCtl_lock, flags2);
     // wait up write thread
     DL1_wait_queue_flag = 1;
     wake_up_interruptible(&DL1_Wait_Queue);
-    spin_unlock_irqrestore(&auddrv_irqstatus_lock, flags);
+    spin_unlock_irqrestore(&auddrv_irqstatus_lock, flags1);
 
 }
 
@@ -1575,7 +1570,7 @@ void CheckPowerState(void)
         Reg_clksq_en = (Reg_clksq_en>>4)&0x1;
         if(Reg_clksq_en ==0)
         {
-            pr_debug("CheckPowerState Reg_clksq_en = 0x%x\n",Ana_Get_Reg (TOP_CKCON1));
+            printk("CheckPowerState Reg_clksq_en = 0x%x\n",Ana_Get_Reg (TOP_CKCON1));
         } */
 }
 
@@ -1656,17 +1651,6 @@ void Auddrv_Free_Dma_Memory(AFE_MEM_CONTROL_T *pAFE_MEM)
     }
 
     pblock =  &(pAFE_MEM->rBlock);
-#if defined(MTK_AUDIO_DYNAMIC_SRAM_SUPPORT)
-    if ((pblock->pucVirtBufAddrBackup != NULL) && (pblock->pucPhysBufAddrBackup != 0))
-    {
-        PRINTK_AUDDRV("dma_free_coherent pucVirtBufAddrBackup = %p pucPhysBufAddrBackup = %x", pblock->pucVirtBufAddrBackup, pblock->pucPhysBufAddrBackup);
-        dma_free_coherent(0, pblock->u4BufferSize, pblock->pucVirtBufAddrBackup, pblock->pucPhysBufAddrBackup);
-    }
-    else
-    {
-        PRINTK_AUDDRV("cannot dma_free_coherent pucVirtBufAddrBackup = %p pucPhysBufAddrBackup = %x", pblock->pucVirtBufAddrBackup, pblock->pucPhysBufAddrBackup);
-    }
-#else
     if ((pblock->pucVirtBufAddr != NULL) && (pblock->pucPhysBufAddr != 0))
     {
         PRINTK_AUDDRV("dma_free_coherent pucVirtBufAddr = %p pucPhysBufAddr = %x", pblock->pucVirtBufAddr, pblock->pucPhysBufAddr);
@@ -1676,7 +1660,6 @@ void Auddrv_Free_Dma_Memory(AFE_MEM_CONTROL_T *pAFE_MEM)
     {
         PRINTK_AUDDRV("cannot dma_free_coherent pucVirtBufAddr = %p pucPhysBufAddr = %x", pblock->pucVirtBufAddr, pblock->pucPhysBufAddr);
     }
-#endif
 }
 
 /*****************************************************************************
@@ -2171,7 +2154,7 @@ void Auddrv_Release_MemIF_Counter(int MEM_Type)
             Afe_Mem_Pwr_on--;
             if (Afe_Mem_Pwr_on < 0)
             {
-                pr_debug("Auddrv_Release_MemIF_Conter Afe_Mem_Pwr_on <0\n");
+                printk("Auddrv_Release_MemIF_Conter Afe_Mem_Pwr_on <0\n");
                 Afe_Mem_Pwr_on = 0;
             }
             ResetWriteWaitEvent();
@@ -3324,11 +3307,11 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 	case GET_EAMP_PARAMETER:
 	{
 		PRINTK_AUDDRV("AudDrv GET_EAMP_PARAMETER \n");
-		pr_debug("AudDrv GET_EAMP_PARAMETER \n");
+		printk("AudDrv GET_EAMP_PARAMETER \n");
 		mutex_lock(&gamp_mutex);
 		if(copy_from_user((void *)(&AMPParam), (const void __user *)(arg), sizeof(AMPParam))){
 			mutex_unlock(&gamp_mutex);
-			pr_debug("Failed to copy from user");
+			printk("Failed to copy from user");
 			return -EFAULT;
 		}
 		PRINTK_AUDDRV("command=%lu,param1=%lu,param2=%lu\n",AMPParam.command,AMPParam.param1,AMPParam.param2);
@@ -3369,15 +3352,15 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
 	case SET_EAMP_PARAMETER:
 	{
 		PRINTK_AUDDRV("AudDrv SET_EAMP_PARAMETER \n");
-		pr_debug("AudDrv SET_EAMP_PARAMETER \n");
+		printk("AudDrv SET_EAMP_PARAMETER \n");
 		mutex_lock(&gamp_mutex);
 		if(copy_from_user((void *)(&AMPParam), (const void __user *)( arg), sizeof(AMPParam))){
 			mutex_unlock(&gamp_mutex);
-			pr_debug("Failed to copy from user");
+			printk("Failed to copy from user");
 			return -EFAULT;
 		}
 		PRINTK_AUDDRV("command=%lu,param1=%lu,param2=%lu\n",AMPParam.command,AMPParam.param1,AMPParam.param2);
-		pr_debug("command=%lu,param1=%lu,param2=%lu\n",AMPParam.command,AMPParam.param1,AMPParam.param2);
+		printk("command=%lu,param1=%lu,param2=%lu\n",AMPParam.command,AMPParam.param1,AMPParam.param2);
 		switch(AMPParam.command)
 		{
 			case AUD_AMP_SET_AMPGAIN:
@@ -3469,7 +3452,7 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
             memcpy((void *)&SPH_Ctrl_State, (void *)&SPH_Ctrl_State_Temp, sizeof(SPH_Control));
             spin_unlock_bh(&auddrv_SphCtlState_lock);
             dmb();
-            pr_debug("SET_AUDIO_STATE bBgsFlag:%d,bRecordFlag:%d,bSpeechFlag:%d,bTtyFlag:%d,bVT:%d,bAudio:%d \n",
+            xlog_printk(ANDROID_LOG_INFO, "Sound", "SET_AUDIO_STATE bBgsFlag:%d,bRecordFlag:%d,bSpeechFlag:%d,bTtyFlag:%d,bVT:%d,bAudio:%d \n",
                         SPH_Ctrl_State.bBgsFlag,
                         SPH_Ctrl_State.bRecordFlag,
                         SPH_Ctrl_State.bSpeechFlag,
@@ -3485,7 +3468,7 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
             {
                 return -EFAULT;
             }
-            pr_debug("GET_AUDIO_STATE bBgsFlag:%d,bRecordFlag:%d,bSpeechFlag:%d,bTtyFlag:%d,bVT:%d,bAudio:%d \n",
+            xlog_printk(ANDROID_LOG_INFO, "Sound", "GET_AUDIO_STATE bBgsFlag:%d,bRecordFlag:%d,bSpeechFlag:%d,bTtyFlag:%d,bVT:%d,bAudio:%d \n",
                         SPH_Ctrl_State.bBgsFlag,
                         SPH_Ctrl_State.bRecordFlag,
                         SPH_Ctrl_State.bSpeechFlag,
@@ -3502,12 +3485,12 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
         case AUDDRV_LOG_PRINT:
         {
             PRINTK_AUDDRV("AudDrv AUDDRV_LOG_PRINT \n");
-            pr_debug("Afe_Mem_Pwr_on =0x%x\n", Afe_Mem_Pwr_on);
-            pr_debug("Aud_AFE_Clk_cntr = 0x%x\n", Aud_AFE_Clk_cntr);
-            pr_debug("Aud_ANA_Clk_cntr = 0x%x\n", Aud_ANA_Clk_cntr);
-            pr_debug("Aud_HDMI_Clk_cntr = 0x%x\n", Aud_HDMI_Clk_cntr);
-            pr_debug("Aud_I2S_Clk_cntr = 0x%x\n", Aud_I2S_Clk_cntr);
-            pr_debug("AuddrvSpkStatus = 0x%x\n", AuddrvSpkStatus);
+            printk("Afe_Mem_Pwr_on =0x%x\n", Afe_Mem_Pwr_on);
+            printk("Aud_AFE_Clk_cntr = 0x%x\n", Aud_AFE_Clk_cntr);
+            printk("Aud_ANA_Clk_cntr = 0x%x\n", Aud_ANA_Clk_cntr);
+            printk("Aud_HDMI_Clk_cntr = 0x%x\n", Aud_HDMI_Clk_cntr);
+            printk("Aud_I2S_Clk_cntr = 0x%x\n", Aud_I2S_Clk_cntr);
+            printk("AuddrvSpkStatus = 0x%x\n", AuddrvSpkStatus);
             Ana_Log_Print();
             Afe_Log_Print();
             break;
@@ -3516,8 +3499,15 @@ static long AudDrv_ioctl(struct file *fp, unsigned int cmd, unsigned long arg)
         {
             int adc_return = 0;
             adc_return = PMIC_IMM_GetOneChannelValue(arg, 1, 0);
-            pr_debug("+AudDrv_GetAuxAdc arg %lu, adc_return 0x%x", arg, adc_return);
+            printk(KERN_EMERG "+AudDrv_GetAuxAdc arg %lu, adc_return 0x%x", arg, adc_return);
             ret = adc_return;
+            break;
+        }
+        case AUDDRV_GET_EXT_AMP_SUPPORT:
+        {
+			int mtk_get_sound_return = 1;
+            PRINTK_AUDDRV("Uses YUSU sound card");
+			ret = mtk_get_sound_return;
             break;
         }
         case AUDDRV_AEE_IOCTL:
@@ -3810,13 +3800,13 @@ ssize_t AudDrv_MEMIF_Read(struct file *fp,  char __user *data, size_t count, lof
     Afe_Block = &(pAfe_MEM_ConTrol->rBlock);
     if (pAfe_MEM_ConTrol == NULL)
     {
-        pr_debug("cannot find MEM control !!!!!!!\n");
+        printk("cannot find MEM control !!!!!!!\n");
         msleep(50);
         return -1;
     }
     if (!Auddrv_CheckRead_MemIF_Fp(pAfe_MEM_ConTrol->MemIfNum))
     {
-        pr_debug("cannot find matcg MemIfNum!!!\n");
+        printk("cannot find matcg MemIfNum!!!\n");
         msleep(50);
         return -1;
     }
@@ -3942,13 +3932,13 @@ ssize_t AudDrv_MEMIF_Read(struct file *fp,  char __user *data, size_t count, lof
             if (DMA_Read_Ptr != Afe_Block->u4DMAReadIdx)
             {
                 /*
-                pr_debug("AudDrv_AWB_Read 3, read_size2:%x, DataRemained:%x, DMA_Read_Ptr:0x%x, DMAReadIdx:%x \r\n",
+                xlog_printk(ANDROID_LOG_INFO, "Sound","AudDrv_AWB_Read 3, read_size2:%x, DataRemained:%x, DMA_Read_Ptr:0x%x, DMAReadIdx:%x \r\n",
                     size_2,Afe_Block->u4DataRemained,DMA_Read_Ptr,Afe_Block->u4DMAReadIdx);*/
             }
             if (copy_to_user((void __user *)(Read_Data_Ptr + size_1), (Afe_Block->pucVirtBufAddr + DMA_Read_Ptr), size_2))
             {
                 /*
-                pr_debug("AudDrv_MEMIF_Read Fail 3 copy to user Read_Data_Ptr:%p, pucVirtBufAddr:%p, u4DMAReadIdx:0x%x, DMA_Read_Ptr:0x%x, read_size:%x",
+                xlog_printk(ANDROID_LOG_ERROR, "Sound","AudDrv_MEMIF_Read Fail 3 copy to user Read_Data_Ptr:%p, pucVirtBufAddr:%p, u4DMAReadIdx:0x%x, DMA_Read_Ptr:0x%x, read_size:%x",
                     Read_Data_Ptr, Afe_Block->pucVirtBufAddr, Afe_Block->u4DMAReadIdx, DMA_Read_Ptr, read_size);*/
                 if (read_count == 0)
                 {
@@ -4008,14 +3998,14 @@ ssize_t AudDrv_MEMIF_Read(struct file *fp,  char __user *data, size_t count, lof
                     break;
                 }
                 default:
-                    pr_debug("cannot find matcg MemIfNum!!!\n");
+                    printk("cannot find matcg MemIfNum!!!\n");
                     msleep(200);
                     return -1;
             }
 
             if (ret <= 0)
             {
-                pr_err("AudDrv_Read wait_event_interruptible_timeout, No Audio Interrupt! ret  ret = %dn", ret);
+                xlog_printk(ANDROID_LOG_ERROR, "Sound", "AudDrv_Read wait_event_interruptible_timeout, No Audio Interrupt! ret  ret = %dn", ret);
                 return read_count;
             }
         }
@@ -4125,7 +4115,7 @@ static int AudDrv_remap_mmap(struct file *flip, struct vm_area_struct *vma)
     if(remap_pfn_range(vma , vma->vm_start , vma->vm_pgoff ,
         vma->vm_end - vma->vm_start , vma->vm_page_prot) < 0)
     {
-        pr_debug("AudDrv_remap_mmap remap_pfn_range Fail \n");
+        xlog_printk(ANDROID_LOG_ERROR, "Sound","AudDrv_remap_mmap remap_pfn_range Fail \n");
         return -EIO;
     }
     vma->vm_ops = &AudDrv_remap_vm_ops;
@@ -4250,10 +4240,7 @@ static ssize_t audio_read_proc(struct file *fp,  char __user *data, size_t count
         return 0;
     }    
     AudDrv_Read_Procmem(stAudioInfo,NULL,0,AUDIOREG_CAT_LEN,NULL,NULL);
-    if(copy_to_user(data,stAudioInfo, AUDIOREG_CAT_LEN))
-    {
-    		PRINTK_AUDDRV("audio_read_proc copy_to_user fail\n");
-    }
+    copy_to_user(data,stAudioInfo, AUDIOREG_CAT_LEN);
     vfree(stAudioInfo);
     bPrintDone = true;
     PRINTK_AUDDRV("audio_read_proc-\n");
@@ -4272,7 +4259,7 @@ static int AudDrv_mod_init(void)
     PRINTK_AUDDRV("+AudDrv_mod_init \n");
 
     //register speaker driver
-    Speaker_Register();
+    //Speaker_Register();
 
 
     // Register platform DRIVER

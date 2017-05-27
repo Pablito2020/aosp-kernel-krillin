@@ -33,13 +33,13 @@ static DEFINE_SPINLOCK(HI544mipiraw_drv_lock);
 //#define HI544_DEBUG_SOFIA
 
 #ifdef HI544_DEBUG
-	#define HI544DB(fmt, arg...) pr_debug(fmt, ##arg)
+	#define HI544DB(fmt, arg...) xlog_printk(ANDROID_LOG_DEBUG, "[HI544Raw] ",  fmt, ##arg)
 #else
 	#define HI544DB(fmt, arg...)
 #endif
 
 #ifdef HI544_DEBUG_SOFIA
-	#define HI544DBSOFIA(fmt, arg...) pr_debug(fmt, ##arg)
+	#define HI544DBSOFIA(fmt, arg...) xlog_printk(ANDROID_LOG_DEBUG, "[HI544Raw] ",  fmt, ##arg)
 #else
 	#define HI544DBSOFIA(fmt, arg...)
 #endif

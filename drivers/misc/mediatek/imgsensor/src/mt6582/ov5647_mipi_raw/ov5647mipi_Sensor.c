@@ -64,7 +64,7 @@ static kal_bool OV5647MIPIAutoFlicKerMode = KAL_FALSE;
 #define OV5647MIPI_DEBUG
 
 #ifdef OV5647MIPI_DEBUG
-#define SENSORDB(fmt, arg...) pr_debug( "[OV5647MIPI]" fmt, ##arg)
+#define SENSORDB(fmt, arg...) xlog_printk(ANDROID_LOG_DEBUG, "[OV5647MIPI]", fmt, ##arg)
 #else
 #define SENSORDB(fmt, arg...)
 #endif
@@ -1648,7 +1648,6 @@ UINT32 OV5647MIPIGetResolution(MSDK_SENSOR_RESOLUTION_INFO_STRUCT *pSensorResolu
 		SENSORDB("****OV5647MIPIGetResolution critical: pSensorResolution is NULL!\n");
 		return ERROR_INVALID_PARA;
 	}
-	spin_lock(&ov5647mipi_drv_lock);
 	pSensorResolution->SensorFullWidth=OV5647MIPI_IMAGE_SENSOR_FULL_WIDTH;
 	pSensorResolution->SensorFullHeight=OV5647MIPI_IMAGE_SENSOR_FULL_HEIGHT;
 	pSensorResolution->SensorPreviewWidth=OV5647MIPI_IMAGE_SENSOR_PV_WIDTH;
@@ -1661,7 +1660,7 @@ UINT32 OV5647MIPIGetResolution(MSDK_SENSOR_RESOLUTION_INFO_STRUCT *pSensorResolu
 	pSensorResolution->Sensor3DPreviewHeight=OV5647MIPI_IMAGE_SENSOR_3D_PV_HEIGHT;	
 	pSensorResolution->Sensor3DVideoWidth=OV5647MIPI_IMAGE_SENSOR_3D_VIDEO_WIDTH;
 	pSensorResolution->Sensor3DVideoHeight=OV5647MIPI_IMAGE_SENSOR_3D_VIDEO_HEIGHT;
-	spin_unlock(&ov5647mipi_drv_lock);	
+	
 	return ret;
 }	/* OV5647MIPIGetResolution() */
 
@@ -2007,7 +2006,7 @@ UINT32 OV5647MIPISetMaxFramerateByScenario(MSDK_SCENARIO_ID_ENUM scenarioId, MUI
 				dummyLine=0;
 			}
 		
-			SENSORDB("OV5647MIPISetMaxFramerateByScenario: frame rate calculate = %d\n",((10 * pclk)/frameHeight/lineLength));
+			SENSORDB("OV5647MIPISetMaxFramerateByScenario: scenarioId = %d, frame rate calculate = %d\n",((10 * pclk)/frameHeight/lineLength));
 			OV5647MIPI_Set_Dummy(0, dummyLine);			
 			break;		
         case MSDK_SCENARIO_ID_CAMERA_3D_PREVIEW: //added

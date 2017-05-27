@@ -1114,7 +1114,7 @@ UINT32 HI191MIPIGetResolution(MSDK_SENSOR_RESOLUTION_INFO_STRUCT *pSensorResolut
     pSensorResolution->SensorPreviewHeight=HI191MIPI_IMAGE_SENSOR_PV_HEIGHT;
 	pSensorResolution->SensorFullWidth=HI191MIPI_IMAGE_SENSOR_FULL_WIDTH;
 	pSensorResolution->SensorFullHeight=HI191MIPI_IMAGE_SENSOR_FULL_HEIGHT;
-	// yanggy 2012-12-10 add for rear camera begin
+	//Gionee yanggy 2012-12-10 add for rear camera begin
     pSensorResolution->SensorVideoWidth= HI191MIPI_IMAGE_SENSOR_PV_WIDTH;
     pSensorResolution->SensorVideoHeight=HI191MIPI_IMAGE_SENSOR_PV_HEIGHT;
     pSensorResolution->Sensor3DPreviewWidth=HI191MIPI_IMAGE_SENSOR_PV_WIDTH;
@@ -1123,7 +1123,7 @@ UINT32 HI191MIPIGetResolution(MSDK_SENSOR_RESOLUTION_INFO_STRUCT *pSensorResolut
     pSensorResolution->Sensor3DFullHeight=HI191MIPI_IMAGE_SENSOR_PV_HEIGHT;
     pSensorResolution->Sensor3DVideoWidth=HI191MIPI_IMAGE_SENSOR_PV_WIDTH;
     pSensorResolution->Sensor3DVideoHeight=HI191MIPI_IMAGE_SENSOR_PV_HEIGHT;
-	// yanggy 2012-12-10 add for rear camera end
+	//Gionee yanggy 2012-12-10 add for rear camera end
 	SENSORDB("[HI191MIPI]exit HI191MIPIGetResolution function SensorPreviewWidth=%d,SensorFullWidth=%d \n",pSensorResolution->SensorPreviewWidth,pSensorResolution->SensorFullWidth);
 	return ERROR_NONE;
 }	/* HI191MIPIGetResolution() */

@@ -33,7 +33,7 @@ static DEFINE_SPINLOCK(s5k3h7ymipiraw_drv_lock);
 #define S5K3H7Y_DEBUG
 #ifdef S5K3H7Y_DEBUG
 #define LOG_TAG (__FUNCTION__)
-#define SENSORDB(fmt,arg...) pr_debug(fmt, ##arg)
+#define SENSORDB(fmt,arg...) xlog_printk(ANDROID_LOG_DEBUG , LOG_TAG, fmt, ##arg)  							//printk(LOG_TAG "%s: " fmt "\n", __FUNCTION__ ,##arg)
 #else
 #define SENSORDB(fmt,arg...)
 #endif
@@ -45,7 +45,21 @@ static DEFINE_SPINLOCK(s5k3h7ymipiraw_drv_lock);
 
 #define S5K3H7_TEST_PATTERN_CHECKSUM (0xadc56499)
 
+#if 0
+#define S5K3H7Y_DEBUG
+#ifdef S5K3H7Y_DEBUG
+	//#define S5K3H7YDB(fmt, arg...) printk( "[S5K3H7YRaw] "  fmt, ##arg)
+	#define S5K3H7YDB(fmt, arg...) xlog_printk(ANDROID_LOG_DEBUG, "[S5K3H7YRaw]" fmt, #arg)
+#else
+	#define S5K3H7YDB(x,...)
+#endif
 
+#ifdef S5K3H7Y_DEBUG_SOFIA
+	#define S5K3H7YDBSOFIA(fmt, arg...) printk( "[S5K3H7YRaw] "  fmt, ##arg)
+#else
+	#define S5K3H7YDBSOFIA(x,...)
+#endif
+#endif
 
 //kal_uint32 S5K3H7Y_FeatureControl_PERIOD_PixelNum=S5K3H7Y_PV_PERIOD_PIXEL_NUMS;
 //kal_uint32 S5K3H7Y_FeatureControl_PERIOD_LineNum=S5K3H7Y_PV_PERIOD_LINE_NUMS;
